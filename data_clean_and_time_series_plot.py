@@ -154,7 +154,6 @@ def plot_daily_confirmed_cases(target_countries_or_states_map):
 
             plt.subplot(211)
             plt.plot(dates, daily_confirmed, '{}--'.format(figure_color[i]), label=target)
-            plt.title('{}_daily_confirmed'.format(target))
             i += 1
         else:
             agg_data = get_one_US_state_agg(target)
@@ -164,16 +163,18 @@ def plot_daily_confirmed_cases(target_countries_or_states_map):
 
             plt.subplot(212)
             plt.plot(dates, daily_confirmed, '{}--'.format(figure_color[j]), label=target)
-            plt.title('{}_daily_confirmed'.format(target))
             j += 1
     plt.subplot(211)
+    plt.xticks(rotation=60, fontsize=10)
     plt.legend()
     plt.title('Daily_Confirmed_by_Country')
 
     plt.subplot(212)
+    plt.xticks(rotation=60, fontsize=10)
     plt.legend()
     plt.title('Daily_Confirmed_by_State')
 
+    plt.tight_layout(pad=7, h_pad=2)	
     plt.suptitle('Daily Confirmed Cases Plotting')
     plt.show()
 # plot daily confirmed cases by country and states
@@ -200,6 +201,7 @@ plt.figure(figsize=(20,12))
 plt.plot(dates, us_daily_confirmed, 'b--', label='US')
 plt.plot(dates, new_york_daily_confirmed, 'r--', label='New York')
 
+plt.xticks(rotation=60, fontsize=10)
 plt.legend()
 plt.title('US and New York daily confirmed cases')
 
