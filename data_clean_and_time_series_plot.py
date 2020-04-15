@@ -111,17 +111,18 @@ def get_one_US_state_agg(us_state):
                                                     lambda x: x.diff()) 
     return agg_by_us_state_and_date.loc[[us_state]].reset_index()
 
+month_year_date = sys.argv[1]
 
 # get daily confirmed cases for US, California, and Santa Clara county starting from 3/22
-def date_filter(string):
+def date_filter(string, month_year_date):
     if datetime.datetime.strptime(string, '%Y-%m-%d') >= datetime.datetime.strptime(
-        '2020-03-22', '%Y-%m-%d'):
+        '2020-{}'.format(month_year_date), '%Y-%m-%d'):
         return True
     return False
 
-def get_data_since_0322(df):
-    df['Last_update_after_0322'] = df.apply(lambda row: date_filter(row['Last_Update']), axis=1)
-    return df[df['Last_update_after_0322'] == True].drop('Last_update_after_0322', axis=1)
+def get_data_since_specific_date(df, month_year_date):
+    df['Last_update_after_specific_date'] = df.apply(lambda row: date_filter(row['Last_Update'], month_year_date), axis=1)
+    return df[df['Last_update_after_specific_date'] == True].drop('Last_update_after_specific_date', axis=1)
 
 
 # define a function that auto plots daily confirmed cases by country and states
@@ -131,14 +132,20 @@ target_countries_or_states_map = {'US':'country',
                                   'France':'country', 
                                   'Germany':'country',
                                   'Canada':'country',
-                                  'India':'country',
-#                                   'Australia':'country',
+#                                   'India':'country',
+                                  'Australia':'country',
 
                                   'California':'state', 
 #                                   'New York':'state', 
-                                  'Massachusetts':'state',
+#                                   'Massachusetts':'state',
                                   'Washington':'state',
-                                  'Wisconsin':'state', 'Ohio':'state', 'Kentucky':'state'
+#                                   'New Jersey':'state', 
+                                  'Florida':'state',
+#                                   'Michigan':'state', 
+                                  'Pennsylvania':'state',
+                                  'Illinois':'state',
+                                  'Louisiana':'state',
+                                  'Texas':'state'
                                   }
 figure_color = ['b', 'g', 'r', 'y', 'm', 'k', 'c'] 
 
@@ -148,18 +155,18 @@ def plot_daily_confirmed_cases(target_countries_or_states_map):
     for target in target_countries_or_states_map:
         if target_countries_or_states_map[target] == 'country':
             agg_data = get_one_country_agg(target)
-            agg_data_after_0322 = get_data_since_0322(agg_data)
-            dates = agg_data_after_0322['Last_Update']
-            daily_confirmed = agg_data_after_0322['daily_confirmed']
+            agg_data_after_specific_date = get_data_since_specific_date(agg_data, month_year_date)
+            dates = agg_data_after_specific_date['Last_Update']
+            daily_confirmed = agg_data_after_specific_date['daily_confirmed']
 
             plt.subplot(211)
             plt.plot(dates, daily_confirmed, '{}--'.format(figure_color[i]), label=target)
             i += 1
         else:
             agg_data = get_one_US_state_agg(target)
-            agg_data_after_0322 = get_data_since_0322(agg_data)
-            dates = agg_data_after_0322['Last_Update']
-            daily_confirmed = agg_data_after_0322['daily_confirmed']
+            agg_data_after_specific_date = get_data_since_specific_date(agg_data, month_year_date)
+            dates = agg_data_after_specific_date['Last_Update']
+            daily_confirmed = agg_data_after_specific_date['daily_confirmed']
 
             plt.subplot(212)
             plt.plot(dates, daily_confirmed, '{}--'.format(figure_color[j]), label=target)
@@ -174,38 +181,35 @@ def plot_daily_confirmed_cases(target_countries_or_states_map):
     plt.legend()
     plt.title('Daily_Confirmed_by_State')
 
-    plt.tight_layout(pad=7, h_pad=2)	
+    plt.tight_layout(pad=7, h_pad=3)	
     plt.suptitle('Daily Confirmed Cases Plotting')
     plt.show()
 # plot daily confirmed cases by country and states
 plot_daily_confirmed_cases(target_countries_or_states_map)
 
+def US_and_states_in_one_plot(target_list):
+    color = ['b', 'g', 'r', 'y', 'm', 'k', 'c'] 
+    i=0
+    plt.figure(figsize=(20,12))
+    for target in target_list:
+        if target =='US':
+            data = get_one_country_agg(target)
+        else:
+            data = get_one_US_state_agg(target)
+        data_after_specific_date = get_data_since_specific_date(data, month_year_date)
+        dates = data_after_specific_date['Last_Update']
+        daily_confirmed = data_after_specific_date['daily_confirmed']
+       
+        plt.plot(dates, daily_confirmed, '{}--'.format(color[i]), label=target)
+        i += 1
+    plt.xticks(rotation=60, fontsize=10)
+    plt.legend()
+    plt.title('Daily Confirmed Cases of US Hot Spots')
 
+    plt.show()
 
-california = get_one_US_state_agg('California')
-new_york = get_one_US_state_agg('New York')
-us = get_one_country_agg('US')
-# us
-# california
-# new_york
-us_after_0322 = get_data_since_0322(us)
-california_after_0322 = get_data_since_0322(california)
-new_york_after_0322 = get_data_since_0322(new_york)
-
-dates = us_after_0322['Last_Update']
-us_daily_confirmed = us_after_0322['daily_confirmed']
-new_york_daily_confirmed = new_york_after_0322['daily_confirmed']
-
-plt.figure(figsize=(20,12))
-
-plt.plot(dates, us_daily_confirmed, 'b--', label='US')
-plt.plot(dates, new_york_daily_confirmed, 'r--', label='New York')
-
-plt.xticks(rotation=60, fontsize=10)
-plt.legend()
-plt.title('US and New York daily confirmed cases')
-
-plt.show()
+target_list = ['US', 'New York', 'New Jersey', 'Massachusetts', 'Michigan']
+US_and_states_in_one_plot(target_list)
 
 #Useful ploting materails: 
 #https://matplotlib.org/tutorials/introductory/pyplot.html
