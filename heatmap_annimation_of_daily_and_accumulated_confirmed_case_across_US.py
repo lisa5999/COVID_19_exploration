@@ -14,11 +14,7 @@ days_list = [(begin_date+datetime.timedelta(days=i)).strftime('%m-%d-%Y') for i 
 
 kaggle_directory_path = 'https://raw.github.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports'
 COVID19 = pd.DataFrame()
-<<<<<<< HEAD
 for i in days_list:
-=======
-for i in days_list[:-1]:
->>>>>>> b5f715ba7badfd370d76cc0dc0bdb32c81713705
     csv_file_path = os.path.join(kaggle_directory_path, i+'.csv')
     df = pd.read_csv(csv_file_path)
     COVID19 = COVID19.append(df, ignore_index=True)
